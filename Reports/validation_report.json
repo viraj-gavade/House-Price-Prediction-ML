@@ -1,0 +1,231 @@
+{
+    "expected_cols": true,
+    "unexpected_cols": true,
+    "expected_dtype": true,
+    "missing_values": {
+        "missing_train_report": {
+            "Lot Frontage": {
+                "column_name": "Lot Frontage",
+                "missing_values": 490
+            },
+            "Alley": {
+                "column_name": "Alley",
+                "missing_values": 2732
+            },
+            "Mas Vnr Type": {
+                "column_name": "Mas Vnr Type",
+                "missing_values": 1775
+            },
+            "Mas Vnr Area": {
+                "column_name": "Mas Vnr Area",
+                "missing_values": 23
+            },
+            "Bsmt Qual": {
+                "column_name": "Bsmt Qual",
+                "missing_values": 80
+            },
+            "Bsmt Cond": {
+                "column_name": "Bsmt Cond",
+                "missing_values": 80
+            },
+            "Bsmt Exposure": {
+                "column_name": "Bsmt Exposure",
+                "missing_values": 83
+            },
+            "BsmtFin Type 1": {
+                "column_name": "BsmtFin Type 1",
+                "missing_values": 80
+            },
+            "BsmtFin SF 1": {
+                "column_name": "BsmtFin SF 1",
+                "missing_values": 1
+            },
+            "BsmtFin Type 2": {
+                "column_name": "BsmtFin Type 2",
+                "missing_values": 81
+            },
+            "BsmtFin SF 2": {
+                "column_name": "BsmtFin SF 2",
+                "missing_values": 1
+            },
+            "Bsmt Unf SF": {
+                "column_name": "Bsmt Unf SF",
+                "missing_values": 1
+            },
+            "Total Bsmt SF": {
+                "column_name": "Total Bsmt SF",
+                "missing_values": 1
+            },
+            "Electrical": {
+                "column_name": "Electrical",
+                "missing_values": 1
+            },
+            "Bsmt Full Bath": {
+                "column_name": "Bsmt Full Bath",
+                "missing_values": 2
+            },
+            "Bsmt Half Bath": {
+                "column_name": "Bsmt Half Bath",
+                "missing_values": 2
+            },
+            "Fireplace Qu": {
+                "column_name": "Fireplace Qu",
+                "missing_values": 1422
+            },
+            "Garage Type": {
+                "column_name": "Garage Type",
+                "missing_values": 157
+            },
+            "Garage Yr Blt": {
+                "column_name": "Garage Yr Blt",
+                "missing_values": 159
+            },
+            "Garage Finish": {
+                "column_name": "Garage Finish",
+                "missing_values": 159
+            },
+            "Garage Cars": {
+                "column_name": "Garage Cars",
+                "missing_values": 1
+            },
+            "Garage Area": {
+                "column_name": "Garage Area",
+                "missing_values": 1
+            },
+            "Garage Qual": {
+                "column_name": "Garage Qual",
+                "missing_values": 159
+            },
+            "Garage Cond": {
+                "column_name": "Garage Cond",
+                "missing_values": 159
+            },
+            "Pool QC": {
+                "column_name": "Pool QC",
+                "missing_values": 2917
+            },
+            "Fence": {
+                "column_name": "Fence",
+                "missing_values": 2358
+            },
+            "Misc Feature": {
+                "column_name": "Misc Feature",
+                "missing_values": 2824
+            }
+        },
+        "missing_test_report": {
+            "Lot Frontage": {
+                "column_name": "Lot Frontage",
+                "missing_values": 490
+            },
+            "Alley": {
+                "column_name": "Alley",
+                "missing_values": 2732
+            },
+            "Mas Vnr Type": {
+                "column_name": "Mas Vnr Type",
+                "missing_values": 1775
+            },
+            "Mas Vnr Area": {
+                "column_name": "Mas Vnr Area",
+                "missing_values": 23
+            },
+            "Bsmt Qual": {
+                "column_name": "Bsmt Qual",
+                "missing_values": 80
+            },
+            "Bsmt Cond": {
+                "column_name": "Bsmt Cond",
+                "missing_values": 80
+            },
+            "Bsmt Exposure": {
+                "column_name": "Bsmt Exposure",
+                "missing_values": 83
+            },
+            "BsmtFin Type 1": {
+                "column_name": "BsmtFin Type 1",
+                "missing_values": 80
+            },
+            "BsmtFin SF 1": {
+                "column_name": "BsmtFin SF 1",
+                "missing_values": 1
+            },
+            "BsmtFin Type 2": {
+                "column_name": "BsmtFin Type 2",
+                "missing_values": 81
+            },
+            "BsmtFin SF 2": {
+                "column_name": "BsmtFin SF 2",
+                "missing_values": 1
+            },
+            "Bsmt Unf SF": {
+                "column_name": "Bsmt Unf SF",
+                "missing_values": 1
+            },
+            "Total Bsmt SF": {
+                "column_name": "Total Bsmt SF",
+                "missing_values": 1
+            },
+            "Electrical": {
+                "column_name": "Electrical",
+                "missing_values": 1
+            },
+            "Bsmt Full Bath": {
+                "column_name": "Bsmt Full Bath",
+                "missing_values": 2
+            },
+            "Bsmt Half Bath": {
+                "column_name": "Bsmt Half Bath",
+                "missing_values": 2
+            },
+            "Fireplace Qu": {
+                "column_name": "Fireplace Qu",
+                "missing_values": 1422
+            },
+            "Garage Type": {
+                "column_name": "Garage Type",
+                "missing_values": 157
+            },
+            "Garage Yr Blt": {
+                "column_name": "Garage Yr Blt",
+                "missing_values": 159
+            },
+            "Garage Finish": {
+                "column_name": "Garage Finish",
+                "missing_values": 159
+            },
+            "Garage Cars": {
+                "column_name": "Garage Cars",
+                "missing_values": 1
+            },
+            "Garage Area": {
+                "column_name": "Garage Area",
+                "missing_values": 1
+            },
+            "Garage Qual": {
+                "column_name": "Garage Qual",
+                "missing_values": 159
+            },
+            "Garage Cond": {
+                "column_name": "Garage Cond",
+                "missing_values": 159
+            },
+            "Pool QC": {
+                "column_name": "Pool QC",
+                "missing_values": 2917
+            },
+            "Fence": {
+                "column_name": "Fence",
+                "missing_values": 2358
+            },
+            "Misc Feature": {
+                "column_name": "Misc Feature",
+                "missing_values": 2824
+            }
+        }
+    },
+    "duplicates": true,
+    "target_exists": true,
+    "category_exists": true,
+    "status": "Failed"
+}

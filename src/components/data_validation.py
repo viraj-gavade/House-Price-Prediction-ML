@@ -1,26 +1,26 @@
+from typing import Any, Dict, List
 from src.exception_handler import CustomMLException
 from src.logger import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os 
 import sys 
+import json
 import pandas as pd 
 from sklearn.model_selection import train_test_split
-from dataclasses import field 
 from pydantic import BaseModel
-from typing import Dict , List
-import json
 
 class ValidationReportSchema(BaseModel):
-   expected_cols : bool | Dict[str,List[str]]
-   unexpected_cols : bool | Dict[str,List[str]]
-   expected_dtype : bool | Dict[str,Dict[str,str]]
-   missing_values : bool | Dict[str,Dict[str,str]]
-   duplicates : bool | Dict[str,int]
-   target_exists : bool | Dict[str,bool]
-   category_exists : Dict[str,bool]
-   status : str
-    
+    expected_cols : bool | Dict[str, List[str]]
+    unexpected_cols : bool | Dict[str, List[str]]
+    expected_dtype : bool | Dict[str, Any]
+    missing_values : bool | Dict[str, Any]
+    duplicates : bool | Dict[str, int]
+    target_exists : bool | Dict[str, bool]
+    category_exists : bool | Dict[str, Any]
+    status : str
 
+    
+@dataclass
 class DataValidationConfig:
     validation_report_path : str = os.path.join('Reports','validation_report.json')
     expected_datatypes : dict = field(default_factory=lambda: {
@@ -253,7 +253,7 @@ class DataValidation:
             for col in df.columns:
                 if col not in self.data_validation_config.expected_features_columns_list:
                     continue
-                missing_values = df[col].isnull().sum()
+                missing_values = int(df[col].isnull().sum())
                 if missing_values > 0:
                     logging.info(f'{col} has {missing_values} missing values')
                     missing_report[col] = {'column_name':col , 'missing_values':missing_values}
@@ -266,7 +266,7 @@ class DataValidation:
     def check_duplicates(self,df:pd.DataFrame)->int:
         try:
             logging.info('Checking for duplicate values : ')
-            duplicates = df.duplicated().sum()
+            duplicates = int(df.duplicated().sum())
             logging.info(f'Duplicate values : {duplicates}')
             return duplicates
         except Exception as e:
@@ -504,12 +504,10 @@ class DataValidation:
 
 
             logging.info('Creating the validation status')
-            if(False in validation_report):
-                validation_report['status'] = 'Failed'
-                logging.info('Data validation failed')
-            else:
+            if all(value is True for value in validation_report.values()):
                 validation_report['status'] = 'Passed'
-                logging.info('Data validation passed')
+            else:
+                validation_report['status'] = 'Failed'
 
             logging.info('Creating the validation report schema')
             report = ValidationReportSchema(
@@ -523,9 +521,11 @@ class DataValidation:
                 status = validation_report['status']
             )
             logging.info('Validation report created successfully')
-            logging.info(f'Saving report to {self.validation_report_path}')
-            with open(self.validation_report_path,'w') as f:
-                json.dump(report.dict(),f)
+            logging.info('Creating repots directory')
+            os.makedirs(os.path.dirname(self.data_validation_config.validation_report_path),exist_ok=True)
+            logging.info(f'Saving report to {self.data_validation_config.validation_report_path}')
+            with open(self.data_validation_config.validation_report_path,'w') as f:
+                f.write(report.model_dump_json(indent=4))
             logging.info('Report saved successfully')
             
             return report
