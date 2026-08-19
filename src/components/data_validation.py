@@ -6,9 +6,23 @@ import sys
 import pandas as pd 
 from sklearn.model_selection import train_test_split
 from dataclasses import field 
+from pydantic import BaseModel
+from typing import Dict , List
+import json
 
+class ValidationReportSchema(BaseModel):
+   expected_cols : bool | Dict[str,List[str]]
+   unexpected_cols : bool | Dict[str,List[str]]
+   expected_dtype : bool | Dict[str,Dict[str,str]]
+   missing_values : bool | Dict[str,Dict[str,str]]
+   duplicates : bool | Dict[str,int]
+   target_exists : bool | Dict[str,bool]
+   category_exists : Dict[str,bool]
+   status : str
+    
 
 class DataValidationConfig:
+    validation_report_path : str = os.path.join('Reports','validation_report.json')
     expected_datatypes : dict = field(default_factory=lambda: {
     "Order": "int64",
     "PID": "int64",
@@ -184,7 +198,7 @@ class DataValidation:
         self.data_validation_config = DataValidationConfig()
     
 
-    def check_expected_cols(self ,df:pd.DataFrame)->dict:
+    def check_expected_cols(self ,df:pd.DataFrame)->list[str]:
         try:
             logging.info('Checking the expected Columns : ')
             for col in df.columns:
@@ -199,7 +213,7 @@ class DataValidation:
             logging.info(f'Error Occured : {e}')
             raise CustomMLException(e,sys)
 
-    def check_unexpected_cols(self,df:pd.DataFrame)->dict:
+    def check_unexpected_cols(self,df:pd.DataFrame)->list[str]:
         try:
             logging.info('Checking for unexpected columns : ')  
             for col in self.data_validation_config.expected_features_columns_list:
@@ -271,6 +285,130 @@ class DataValidation:
             logging.info(f'Error Occured : {e}')
             raise CustomMLException(e,sys)
              
+    def category_validation(self, df: pd.DataFrame) -> dict:
+        try:
+            logging.info("Validating categorical columns")
+
+            valid_categories = {
+                "MS Zoning": ['RL', 'RH', 'FV', 'RM', 'C (all)', 'I (all)', 'A (agr)'],
+                "Street": ['Pave', 'Grvl'],
+                "Alley": ['Pave', 'Grvl'],
+                "Lot Shape": ['IR1', 'Reg', 'IR2', 'IR3'],
+                "Land Contour": ['Lvl', 'HLS', 'Bnk', 'Low'],
+                "Utilities": ['AllPub', 'NoSewr', 'NoSeWa'],
+                "Lot Config": ['Corner', 'Inside', 'CulDSac', 'FR2', 'FR3'],
+                "Land Slope": ['Gtl', 'Mod', 'Sev'],
+                "Neighborhood": [
+                    'NAmes', 'Gilbert', 'StoneBr', 'NWAmes', 'Somerst',
+                    'BrDale', 'NPkVill', 'NridgHt', 'Blmngtn', 'NoRidge',
+                    'SawyerW', 'Sawyer', 'Greens', 'BrkSide', 'OldTown',
+                    'IDOTRR', 'ClearCr', 'SWISU', 'Edwards', 'CollgCr',
+                    'Crawfor', 'Blueste', 'Mitchel', 'Timber', 'MeadowV',
+                    'Veenker', 'GrnHill', 'Landmrk'
+                ],
+                "Condition 1": [
+                    'Norm', 'Feedr', 'PosN', 'RRNe', 'RRAe',
+                    'Artery', 'PosA', 'RRAn', 'RRNn'
+                ],
+                "Condition 2": [
+                    'Norm', 'Feedr', 'PosA', 'PosN', 'Artery',
+                    'RRNn', 'RRAe', 'RRAn'
+                ],
+                "Bldg Type": ['1Fam', 'TwnhsE', 'Twnhs', 'Duplex', '2fmCon'],
+                "House Style": [
+                    '1Story', '2Story', '1.5Fin', 'SFoyer',
+                    'SLvl', '2.5Unf', '1.5Unf', '2.5Fin'
+                ],
+                "Roof Style": ['Hip', 'Gable', 'Mansard', 'Gambrel', 'Shed', 'Flat'],
+                "Roof Matl": [
+                    'CompShg', 'WdShake', 'Tar&Grv', 'WdShngl',
+                    'Membran', 'ClyTile', 'Roll', 'Metal'
+                ],
+                "Exterior 1st": [
+                    'BrkFace', 'VinylSd', 'Wd Sdng', 'CemntBd',
+                    'HdBoard', 'Plywood', 'MetalSd', 'AsbShng',
+                    'WdShing', 'Stucco', 'AsphShn', 'BrkComm',
+                    'CBlock', 'PreCast', 'Stone', 'ImStucc'
+                ],
+                "Exterior 2nd": [
+                    'Plywood', 'VinylSd', 'Wd Sdng', 'BrkFace',
+                    'CmentBd', 'HdBoard', 'Wd Shng', 'MetalSd',
+                    'ImStucc', 'Brk Cmn', 'AsbShng', 'Stucco',
+                    'AsphShn', 'CBlock', 'Stone', 'PreCast', 'Other'
+                ],
+                "Mas Vnr Type": ['Stone', 'BrkFace', 'BrkCmn', 'CBlock'],
+                "Exter Qual": ['TA', 'Gd', 'Ex', 'Fa'],
+                "Exter Cond": ['TA', 'Gd', 'Fa', 'Po', 'Ex'],
+                "Foundation": ['CBlock', 'PConc', 'Wood', 'BrkTil', 'Slab', 'Stone'],
+                "Bsmt Qual": ['TA', 'Gd', 'Ex', 'Fa', 'Po'],
+                "Bsmt Cond": ['Gd', 'TA', 'Po', 'Fa', 'Ex'],
+                "Bsmt Exposure": ['Gd', 'No', 'Mn', 'Av'],
+                "BsmtFin Type 1": ['BLQ', 'Rec', 'ALQ', 'GLQ', 'Unf', 'LwQ'],
+                "BsmtFin Type 2": ['Unf', 'LwQ', 'BLQ', 'Rec', 'GLQ', 'ALQ'],
+                "Heating": ['GasA', 'GasW', 'Grav', 'Wall', 'Floor', 'OthW'],
+                "Heating QC": ['Fa', 'TA', 'Ex', 'Gd', 'Po'],
+                "Central Air": ['Y', 'N'],
+                "Electrical": ['SBrkr', 'FuseA', 'FuseF', 'FuseP', 'Mix'],
+                "Kitchen Qual": ['TA', 'Gd', 'Ex', 'Fa', 'Po'],
+                "Functional": [
+                    'Typ', 'Mod', 'Min1', 'Min2',
+                    'Maj1', 'Maj2', 'Sev', 'Sal'
+                ],
+                "Fireplace Qu": ['Gd', 'TA', 'Po', 'Ex', 'Fa'],
+                "Garage Type": [
+                    'Attchd', 'BuiltIn', 'Basment',
+                    'Detchd', 'CarPort', '2Types'
+                ],
+                "Garage Finish": ['Fin', 'Unf', 'RFn'],
+                "Garage Qual": ['TA', 'Fa', 'Gd', 'Ex', 'Po'],
+                "Garage Cond": ['TA', 'Fa', 'Gd', 'Ex', 'Po'],
+                "Paved Drive": ['P', 'Y', 'N'],
+                "Pool QC": ['Ex', 'Gd', 'TA', 'Fa'],
+                "Fence": ['MnPrv', 'GdPrv', 'GdWo', 'MnWw'],
+                "Misc Feature": ['Gar2', 'Shed', 'Othr', 'Elev', 'TenC'],
+                "Sale Type": [
+                    'WD ', 'New', 'COD', 'ConLI', 'Con',
+                    'ConLD', 'Oth', 'ConLw', 'CWD', 'VWD'
+                ],
+                "Sale Condition": [
+                    'Normal', 'Partial', 'Family',
+                    'Abnorml', 'Alloca', 'AdjLand'
+                ]
+            }
+
+            errors = {}
+
+            for column, valid_values in valid_categories.items():
+
+                if column not in df.columns:
+                    errors[column] = {
+                        "error": "Column not found in dataframe"
+                    }
+                    continue
+
+                actual_values = set(df[column].dropna().unique())
+                valid_values_set = set(valid_values)
+
+                invalid_values = actual_values - valid_values_set
+
+                if invalid_values:
+                    errors[column] = {
+                        "error": "Invalid categories",
+                        "invalid_values": list(invalid_values),
+                        "valid_values": valid_values
+                    }
+
+            if errors:
+                logging.info(f"Category validation failed: {errors}")
+            else:
+                logging.info("All categorical columns are valid")
+
+            return errors
+
+        except Exception as e:
+            logging.info(f"Exception Occurred: {e}")
+            raise CustomMLException(e, sys)
+    
     def initiate_data_validation(self,train_path: str , test_path : str ):
         try:
             validation_report = {}
@@ -352,8 +490,45 @@ class DataValidation:
                     'test_target_exists' : test_target_exists
                 }
             
+            logging.info('Checking for the Categorical values on train and test dataset')
+            category_error_train = self.category_validation(train_df)
+            category_error_test = self.category_validation(test_df)
+            if (len(category_error_train) == 0) and (len(category_error_test) == 0):
+                validation_report['category_exists'] = True
+                logging.info('Categorical values are present in the dataset')
+            else:
+                validation_report['category_exists'] = {
+                    'category_train_error' : category_error_train,
+                    'category_test_error' : category_error_test
+                }   
+
+
+            logging.info('Creating the validation status')
+            if(False in validation_report):
+                validation_report['status'] = 'Failed'
+                logging.info('Data validation failed')
+            else:
+                validation_report['status'] = 'Passed'
+                logging.info('Data validation passed')
+
+            logging.info('Creating the validation report schema')
+            report = ValidationReportSchema(
+                expected_cols = validation_report['expected_cols'],
+                unexpected_cols = validation_report['unexpected_cols'],
+                expected_dtype = validation_report['expected_dtype'],
+                missing_values = validation_report['missing_values'],
+                duplicates = validation_report['duplicates'],
+                target_exists = validation_report['target_exists'],
+                category_exists = validation_report['category_exists'],
+                status = validation_report['status']
+            )
+            logging.info('Validation report created successfully')
+            logging.info(f'Saving report to {self.validation_report_path}')
+            with open(self.validation_report_path,'w') as f:
+                json.dump(report.dict(),f)
+            logging.info('Report saved successfully')
             
-            
+            return report
         except Exception as e :
             logging.info(f'Error Occured : {e}')
             raise CustomMLException(e,sys)
