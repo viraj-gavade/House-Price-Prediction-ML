@@ -527,7 +527,8 @@ class DataValidation:
             with open(self.data_validation_config.validation_report_path,'w') as f:
                 f.write(report.model_dump_json(indent=4))
             logging.info('Report saved successfully')
-            
+            logging.info('** PHASE 2 : Data Validation Pipeline Completed Successfully! **')
+           
             return report
         except Exception as e :
             logging.info(f'Error Occured : {e}')

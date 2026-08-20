@@ -53,7 +53,7 @@ class DataIngestion:
 
 
 
-            logging.info('** PHASE 2 : Data Ingestion Pipeline Completed Successfully! **')
+            logging.info('** PHASE 1 : Data Ingestion Pipeline Completed Successfully! **')
 
             return (
                 self.data_ingestion_config.train_data_path,
