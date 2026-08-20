@@ -13,7 +13,7 @@ from sklearn.compose import ColumnTransformer
 
 @dataclass
 class DataTransformationConfig:
-    preprocessor_path : str = os.path.join('Artifcats/Encoders','preprocessor.pkl')
+    preprocessor_path : str = os.path.join('Artifacts/Encoders','preprocessor.pkl')
     target_col : str = 'SalePrice'
     columns_to_drop : list = field(default_factory=lambda:['Order','PID'])
 
@@ -166,7 +166,7 @@ class DataTransformation:
             y_train_transformed = y_train
             y_test_transformed = y_test
 
-            logging.info('** PHASE 2 : Data Tranformation Pipeline Completed Successfully! **')
+            logging.info('** PHASE 3 : Data Tranformation Pipeline Completed Successfully! **')
 
             return (
                 X_train_transformed,X_test_transformed,y_train_transformed,y_test_transformed,self.data_tranformation_config.preprocessor_path

@@ -1,6 +1,7 @@
 from src.components.data_ingestion import DataIngestion
 from src.components.data_validation import DataValidation
 from src.components.data_transformation import DataTransformation
+from src.components.model_training import ModelTrainer
 from src.exception_handler import CustomMLException
 import sys
 from src.logger import logging
@@ -22,9 +23,14 @@ class TrainingPipeline:
 
             transformation_obj = DataTransformation()
             X_train_transformed,X_test_transformed,y_train_transformed,y_test_transformed,preprocessor_path = transformation_obj.initiate_data_transformation(train_path,test_path)
+            X_train_transformed,X_test_transformed,y_train_transformed,y_test_transformed,preprocessor_path = transformation_obj.initiate_data_transformation(train_path,test_path)
             logging.info(f'X_train_transformed : {X_train_transformed.shape} ,X_test_transformed : {X_test_transformed.shape} ')
+            logging.info(f'X_train_transformed Type : : {type(X_train_transformed)} ,X_test_transformed : {X_test_transformed.shape} ')
             logging.info(f'y_train_transformed : {y_train_transformed.shape} ,y_test_transformed : {y_test_transformed.shape} ')
             logging.info(f'preprocessor_path : {preprocessor_path} ')
+
+            modeltrainer_obj = ModelTrainer()
+            modeltrainer_obj.initiate_model_training( X_train_transformed,X_test_transformed,y_train_transformed,y_test_transformed)
             
 
             
