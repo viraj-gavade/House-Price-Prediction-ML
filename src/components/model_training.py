@@ -25,8 +25,9 @@ from sklearn.ensemble import (
 # from xgboost import XGBRegressor
 from src.utils import save_object
 from sklearn.model_selection import RandomizedSearchCV
-
-
+import mlflow
+mlflow.set_tracking_uri("http://127.0.0.1:5000")
+mlflow.set_experiment("House Price Prediction")
 @dataclass
 class ModelTrainingConfig:
     best_base_model_path : str = os.path.join('Artifacts/Models','best_base_model.pkl')
@@ -183,6 +184,31 @@ class ModelTrainer:
                 r2_score_test = r2_score(y_test_transformed,y_pred_test)
 
                 logging.info("Evaluation Metrics Calulated Sucessfully")
+
+                logging.info('Tracking the experiment with the mlflow')
+                with mlflow.start_run(run_name=model_name) as run:
+                    mlflow.log_params(
+                        {
+                            'model_name':model_name,
+                            'Train Sample':len(X_train_transformed),
+                            'Test Sample':len(X_test_transformed),
+                            'n_features': X_train_transformed.shape[1]
+                        }
+                    )
+                    mlflow.log_metrics({
+                        'mean_absolute_error_train':mean_absolute_error_train,
+                        'mean_squared_error_train':mean_squared_error_train,
+                        'r2_score_train':r2_score_train,
+                        'mean_absolute_error_test':mean_absolute_error_test,
+                        'mean_squared_error_test':mean_squared_error_test,
+                        'r2_score_test':r2_score_test
+
+                    })
+                    mlflow.sklearn.log_model(
+                        model,
+                        name=model_name,
+                        serialization_format='pickle'
+                    )
 
                 model_report[model_name] = {
                     'mean_absolute_error_train':mean_absolute_error_train,

@@ -1,3 +1,6 @@
 data/
 Logs
 Artifcats/
+mlartifacts/
+mlruns/
+mlflow.db
