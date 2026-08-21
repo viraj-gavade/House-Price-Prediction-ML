@@ -43,12 +43,12 @@ class DataIngestion:
             
 
             logging.info('Saving the train data to the artifacts folder')
-            df.to_csv(self.data_ingestion_config.train_data_path,index=False)
+            train_df.to_csv(self.data_ingestion_config.train_data_path,index=False)
             logging.info('train data saved successfully to artifacts folder')
 
 
             logging.info('Saving the test data to the artifacts folder')
-            df.to_csv(self.data_ingestion_config.test_data_path,index=False)
+            test_df.to_csv(self.data_ingestion_config.test_data_path,index=False)
             logging.info('test data saved successfully to artifacts folder')
 
 

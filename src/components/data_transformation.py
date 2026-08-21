@@ -86,14 +86,16 @@ class DataTransformation:
             logging.info(f'X_train : {X_train.shape} , X_test : {X_test.shape} , y_train : {y_train.shape} , y_test : {y_test.shape} ')
 
             logging.info(f'Dropping the Unnecessary Columns : {self.data_tranformation_config.columns_to_drop}')
-            X_train.drop(columns=self.data_tranformation_config.columns_to_drop,axis=1)
-            X_test.drop(columns=self.data_tranformation_config.columns_to_drop,axis=1)
+            X_train.drop(columns=self.data_tranformation_config.columns_to_drop,axis=1,inplace=True)
+            X_test.drop(columns=self.data_tranformation_config.columns_to_drop,axis=1,inplace=True)
             logging.info('Unnecessary Columns dropped successfully')
+            logging.info(f'X_train : {X_train.shape} , X_test : {X_test.shape} , y_train : {y_train.shape} , y_test : {y_test.shape} ')
 
-
+            
             logging.info('Creating the new features with feature engineering')
             X_train = self.create_features(X_train)
             X_test = self.create_features(X_test)
+            logging.info(f'Raw Features : { len(X_train)}')
             logging.info('Features created successsfully')
 
             logging.info('Identifying the categorical and numerical columns')
