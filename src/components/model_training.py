@@ -66,12 +66,66 @@ class ModelTrainingConfig:
             # )
     })
 
+import mlflow
+from mlflow.tracking import MlflowClient
 
+
+def is_model_better(r2_score: float, model_name: str) -> bool:
+    """
+    Compare the new model's R2 score with the currently
+    registered model's R2 score.
+
+    Returns:
+        True  -> new model is better
+        False -> existing model is better/equal
+    """
+
+    client = MlflowClient()
+
+    try:
+        # Get all versions of the registered model
+        versions = client.search_model_versions(
+            f"name='{model_name}'"
+        )
+
+        if not versions:
+            # No registered model exists yet
+            return True
+
+        # Get the latest registered model version
+        latest_version = max(
+            versions,
+            key=lambda version: int(version.version)
+        )
+
+        # Get the MLflow run associated with that model version
+        run = client.get_run(latest_version.run_id)
+
+        best_r2_score = run.data.metrics.get("r2_score")
+
+        if best_r2_score is None:
+            # Existing model doesn't have R2 recorded
+            return True
+
+        print(f"Existing R2 : {best_r2_score}")
+        print(f"New R2      : {r2_score}")
+
+        if r2_score > best_r2_score:
+            print("New model is better.")
+            return True
+
+        print("Existing model is better or equal.")
+        return False
+
+    except Exception as e:
+        print(f"Error while comparing models: {e}")
+        return True
 
 class ModelTrainer:
     def __init__(self):
         self.model_trainer_config = ModelTrainingConfig()
 
+    
     
     def hyperparamter_tune_base_model(self,X_train_transformed:np.ndarray,y_train_transformed:np.ndarray,best_base_model_name : str ):
         try:
@@ -204,12 +258,11 @@ class ModelTrainer:
                         'r2_score_test':r2_score_test
 
                     })
-                    mlflow.sklearn.log_model(
+                    model_info = mlflow.sklearn.log_model(
                         model,
                         name=model_name,
                         serialization_format='pickle'
                     )
-
                 model_report[model_name] = {
                     'mean_absolute_error_train':mean_absolute_error_train,
                     'mean_squared_error_train':mean_squared_error_train,
@@ -253,11 +306,30 @@ class ModelTrainer:
 
             logging.info('Initiating the hyperparamter tunning')
             best_tunned_score, best_tunned_model = self.hyperparamter_tune_base_model(X_train_transformed,y_train_transformed,best_base_model_name)
-            if(best_tunned_score > best_base_model_r2_score):
-                logging.info('Regiter tunned model on prod')
-            else:
-                logging.info('Regsiter base model on prod')
 
+            logging.info('Checking if tunned model is better than prod model')
+            if(best_tunned_score > best_base_model_r2_score):
+                logging.info('Tunned model is better than prod model registering it')
+                model_info = mlflow.sklearn.log_model(
+                        best_tunned_model,
+                        name=model_name,
+                        serialization_format='pickle'
+                    )
+                is_model_better(best_tunned_score,best_base_model_name)
+                mlflow.register_model(
+                                             model_uri=model_info.model_uri,
+                                             name='HousePriceModel'
+                                        )
+                
+                logging.info('Tunned Model registered on prod successfully')
+            else:
+                logging.info('Based model is better than tunned model registering it')
+                model_info = mlflow.sklearn.log_model(
+                        best_base_model,
+                        name=model_name,
+                        serialization_format='pickle'
+                    )
+                logging.info('Base model registered on prod successfully')
 
             logging.info('** PHASE 4 : Model Trainer Pipeline Completed Successfully! **')
         except Exception as e:
